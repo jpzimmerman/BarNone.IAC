@@ -18,13 +18,11 @@ resource "aws_default_security_group" "barnone-db" {
 
   ingress {
 
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  # Allow all outbound traffic.
 
   egress {
     from_port   = 0
@@ -40,6 +38,28 @@ resource "aws_default_security_group" "barnone-db" {
   depends_on = [aws_vpc.barnone_vpc]
 }
 
+
+resource "aws_default_network_acl" "barnone-acl" {
+  default_network_acl_id = aws_vpc.barnone_vpc.default_network_acl_id
+
+  ingress {
+    protocol   = -1
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
+  egress {
+    protocol   = -1
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+}
 #####################
 ##     Subnets     ##
 #####################
@@ -188,8 +208,8 @@ resource "aws_route_table_association" "barnone-private-association2" {
 ##  DB Instance(s)  ##
 ############################
 
-resource "aws_db_subnet_group" "barnone_db_subnet_group" {
-  name       = "barnone_db_subnet_group"
+resource "aws_db_subnet_group" "barnone-db-subnet-group" {
+  name       = "barnone-db-subnet-group"
   subnet_ids = [aws_subnet.barnone-subnet-public1-us-east-1a.id, aws_subnet.barnone-subnet-public2-us-east-1b.id]
 
   tags = {
@@ -213,8 +233,8 @@ resource "aws_db_instance" "cocktails" {
   storage_type           = "gp3"
   multi_az               = false
   vpc_security_group_ids = ["${aws_default_security_group.barnone-db.id}"]
-  db_subnet_group_name   = aws_db_subnet_group.barnone_db_subnet_group.id
+  db_subnet_group_name   = aws_db_subnet_group.barnone-db-subnet-group.id
   apply_immediately      = true
 
-  depends_on = [aws_internet_gateway.barnone-igw, aws_db_subnet_group.barnone_db_subnet_group]
+  depends_on = [aws_internet_gateway.barnone-igw, aws_db_subnet_group.barnone-db-subnet-group]
 }
