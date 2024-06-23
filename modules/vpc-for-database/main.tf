@@ -1,11 +1,11 @@
-resource "aws_vpc" "barnone_vpc" {
+resource "aws_vpc" "barnone-vpc" {
   cidr_block           = var.vpc_cidr_block
   instance_tenancy     = "default"
   enable_dns_hostnames = true
   enable_dns_support   = true
 
   tags = {
-    Name = "barnone_vpc"
+    Name = "barnone-vpc"
   }
 }
 
@@ -14,39 +14,39 @@ resource "aws_vpc" "barnone_vpc" {
 ###################################################
 
 resource "aws_default_security_group" "barnone-db" {
-  vpc_id = aws_vpc.barnone_vpc.id
+  vpc_id = aws_vpc.barnone-vpc.id
 
   ingress {
 
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.allopen_cidr_block]
   }
 
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.allopen_cidr_block]
   }
 
   tags = {
     Name = "barnone-db"
   }
 
-  depends_on = [aws_vpc.barnone_vpc]
+  depends_on = [aws_vpc.barnone-vpc]
 }
 
 
 resource "aws_default_network_acl" "barnone-acl" {
-  default_network_acl_id = aws_vpc.barnone_vpc.default_network_acl_id
+  default_network_acl_id = aws_vpc.barnone-vpc.default_network_acl_id
 
   ingress {
     protocol   = -1
     rule_no    = 100
     action     = "allow"
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.allopen_cidr_block
     from_port  = 0
     to_port    = 0
   }
@@ -55,7 +55,7 @@ resource "aws_default_network_acl" "barnone-acl" {
     protocol   = -1
     rule_no    = 100
     action     = "allow"
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.allopen_cidr_block
     from_port  = 0
     to_port    = 0
   }
@@ -64,10 +64,10 @@ resource "aws_default_network_acl" "barnone-acl" {
 ##     Subnets     ##
 #####################
 
-resource "aws_subnet" "barnone-subnet-public1-us-east-1a" {
-  vpc_id                                         = aws_vpc.barnone_vpc.id
+resource "aws_subnet" "barnone-subnet-public1-a" {
+  vpc_id                                         = aws_vpc.barnone-vpc.id
   assign_ipv6_address_on_creation                = false
-  availability_zone                              = "us-east-1a"
+  availability_zone                              = "${data.aws_region.current_region.name}a"
   cidr_block                                     = "10.0.0.0/20"
   customer_owned_ipv4_pool                       = ""
   enable_dns64                                   = false
@@ -80,16 +80,16 @@ resource "aws_subnet" "barnone-subnet-public1-us-east-1a" {
   private_dns_hostname_type_on_launch            = "ip-name"
 
   tags = {
-    Name = "barnone-subnet-public1-us-east-1a"
+    Name = "barnone-subnet-public1-a"
   }
 
-  depends_on = [aws_vpc.barnone_vpc]
+  depends_on = [aws_vpc.barnone-vpc]
 }
 
-resource "aws_subnet" "barnone-subnet-private1-us-east-1a" {
-  vpc_id                                         = aws_vpc.barnone_vpc.id
+resource "aws_subnet" "barnone-subnet-private1-a" {
+  vpc_id                                         = aws_vpc.barnone-vpc.id
   assign_ipv6_address_on_creation                = false
-  availability_zone                              = "us-east-1a"
+  availability_zone                              = "${data.aws_region.current_region.name}a"
   cidr_block                                     = "10.0.128.0/20"
   customer_owned_ipv4_pool                       = ""
   enable_dns64                                   = false
@@ -102,14 +102,14 @@ resource "aws_subnet" "barnone-subnet-private1-us-east-1a" {
   private_dns_hostname_type_on_launch            = "ip-name"
 
   tags = {
-    Name = "barnone-subnet-private1-us-east-1a"
+    Name = "barnone-subnet-private1-${data.aws_region.current_region.name}a"
   }
 }
 
-resource "aws_subnet" "barnone-subnet-public2-us-east-1b" {
-  vpc_id                                         = aws_vpc.barnone_vpc.id
+resource "aws_subnet" "barnone-subnet-public2-b" {
+  vpc_id                                         = aws_vpc.barnone-vpc.id
   assign_ipv6_address_on_creation                = false
-  availability_zone                              = "us-east-1b"
+  availability_zone                              = "${data.aws_region.current_region.name}b"
   cidr_block                                     = "10.0.16.0/20"
   customer_owned_ipv4_pool                       = ""
   enable_dns64                                   = false
@@ -122,14 +122,14 @@ resource "aws_subnet" "barnone-subnet-public2-us-east-1b" {
   private_dns_hostname_type_on_launch            = "ip-name"
 
   tags = {
-    Name = "barnone-subnet-public2-us-east-1b"
+    Name = "barnone-subnet-public2-${data.aws_region.current_region.name}b"
   }
 }
 
-resource "aws_subnet" "barnone-subnet-private2-us-east-1b" {
-  vpc_id                                         = aws_vpc.barnone_vpc.id
+resource "aws_subnet" "barnone-subnet-private2-b" {
+  vpc_id                                         = aws_vpc.barnone-vpc.id
   assign_ipv6_address_on_creation                = false
-  availability_zone                              = "us-east-1b"
+  availability_zone                              = "${data.aws_region.current_region.name}b"
   cidr_block                                     = "10.0.144.0/20"
   customer_owned_ipv4_pool                       = ""
   enable_dns64                                   = false
@@ -142,7 +142,7 @@ resource "aws_subnet" "barnone-subnet-private2-us-east-1b" {
   private_dns_hostname_type_on_launch            = "ip-name"
 
   tags = {
-    Name = "barnone-subnet-private2-us-east-1b"
+    Name = "barnone-subnet-private2-${data.aws_region.current_region.name}b"
   }
 }
 
@@ -151,7 +151,7 @@ resource "aws_subnet" "barnone-subnet-private2-us-east-1b" {
 ##########################
 
 resource "aws_internet_gateway" "barnone-igw" {
-  vpc_id = aws_vpc.barnone_vpc.id
+  vpc_id = aws_vpc.barnone-vpc.id
 
   tags = {
     Name = "barnone-igw"
@@ -163,9 +163,9 @@ resource "aws_internet_gateway" "barnone-igw" {
 ####################
 
 resource "aws_default_route_table" "barnone-rtb-public" {
-  default_route_table_id = aws_vpc.barnone_vpc.default_route_table_id
+  default_route_table_id = aws_vpc.barnone-vpc.default_route_table_id
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.allopen_cidr_block
     gateway_id = aws_internet_gateway.barnone-igw.id
   }
 
@@ -177,30 +177,30 @@ resource "aws_default_route_table" "barnone-rtb-public" {
 }
 
 resource "aws_route" "internet-route" {
-  route_table_id         = aws_vpc.barnone_vpc.main_route_table_id
-  destination_cidr_block = "0.0.0.0/0"
+  route_table_id         = aws_vpc.barnone-vpc.main_route_table_id
+  destination_cidr_block = var.allopen_cidr_block
   gateway_id             = aws_internet_gateway.barnone-igw.id
 }
 
 ## Route Table associations
 resource "aws_route_table_association" "barnone-public-association1" {
-  subnet_id      = aws_subnet.barnone-subnet-public1-us-east-1a.id
-  route_table_id = aws_vpc.barnone_vpc.default_route_table_id
+  subnet_id      = aws_subnet.barnone-subnet-public1-a.id
+  route_table_id = aws_vpc.barnone-vpc.default_route_table_id
 }
 
 resource "aws_route_table_association" "barnone-public-association2" {
-  subnet_id      = aws_subnet.barnone-subnet-public2-us-east-1b.id
-  route_table_id = aws_vpc.barnone_vpc.default_route_table_id
+  subnet_id      = aws_subnet.barnone-subnet-public2-b.id
+  route_table_id = aws_vpc.barnone-vpc.default_route_table_id
 }
 
 resource "aws_route_table_association" "barnone-private-association1" {
-  subnet_id      = aws_subnet.barnone-subnet-private1-us-east-1a.id
-  route_table_id = aws_vpc.barnone_vpc.default_route_table_id
+  subnet_id      = aws_subnet.barnone-subnet-private1-a.id
+  route_table_id = aws_vpc.barnone-vpc.default_route_table_id
 }
 
 resource "aws_route_table_association" "barnone-private-association2" {
-  subnet_id      = aws_subnet.barnone-subnet-private2-us-east-1b.id
-  route_table_id = aws_vpc.barnone_vpc.default_route_table_id
+  subnet_id      = aws_subnet.barnone-subnet-private2-b.id
+  route_table_id = aws_vpc.barnone-vpc.default_route_table_id
 }
 
 
@@ -210,7 +210,7 @@ resource "aws_route_table_association" "barnone-private-association2" {
 
 resource "aws_db_subnet_group" "barnone-db-subnet-group" {
   name       = "barnone-db-subnet-group"
-  subnet_ids = [aws_subnet.barnone-subnet-public1-us-east-1a.id, aws_subnet.barnone-subnet-public2-us-east-1b.id]
+  subnet_ids = [aws_subnet.barnone-subnet-public1-a.id, aws_subnet.barnone-subnet-public2-b.id]
 
   tags = {
     Name = "Cocktails DB subnet group"
