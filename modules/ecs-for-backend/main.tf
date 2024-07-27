@@ -1,44 +1,5 @@
-resource "aws_vpc" "barnone-vpc" {
-  tags = {
-    "Name" = "barnone-vpc"
-  }
-
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-}
-
-resource "aws_subnet" "barnone-subnet-public1-a" {
-  vpc_id                  = aws_vpc.barnone-vpc.id
-  cidr_block              = "10.0.0.0/20"
-  map_public_ip_on_launch = true
-
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-
-  tags = {
-    "Name" = "barnone-subnet-public1-a"
-  }
-}
-
-resource "aws_subnet" "barnone-subnet-public2-a" {
-  vpc_id                  = aws_vpc.barnone-vpc.id
-  cidr_block              = "10.0.16.0/20"
-  map_public_ip_on_launch = true
-
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-
-  tags = {
-    "Name" = "barnone-subnet-public2-us-east-1b"
-  }
-}
-
-
 resource "aws_security_group" "barnone-backend" {
-  vpc_id = aws_vpc.barnone-vpc.id
+  vpc_id = data.aws_vpc.barnone.id
 
   ingress {
 
@@ -58,12 +19,10 @@ resource "aws_security_group" "barnone-backend" {
   tags = {
     Name = "barnone-backend"
   }
-
-  depends_on = [aws_vpc.barnone-vpc]
 }
 
 resource "aws_vpc_endpoint" "ecr_api_endpoint" {
-  vpc_id              = aws_vpc.barnone-vpc.id
+  vpc_id              = data.aws_vpc.barnone.id
   service_name        = "com.amazonaws.us-east-1.ecr.api"
   private_dns_enabled = true
   vpc_endpoint_type   = "Interface"
@@ -73,12 +32,12 @@ resource "aws_vpc_endpoint" "ecr_api_endpoint" {
   ]
 
   subnet_ids = [
-    aws_subnet.barnone-subnet-public1-a.id, aws_subnet.barnone-subnet-public2-a.id
+    data.aws_subnet.barnone-public1-a.id, data.aws_subnet.barnone-public2-b.id
   ]
 }
 
 resource "aws_vpc_endpoint" "ecr_dkr_endpoint" {
-  vpc_id              = aws_vpc.barnone-vpc.id
+  vpc_id              = data.aws_vpc.barnone.id
   service_name        = "com.amazonaws.us-east-1.ecr.dkr"
   private_dns_enabled = true
   vpc_endpoint_type   = "Interface"
@@ -88,10 +47,9 @@ resource "aws_vpc_endpoint" "ecr_dkr_endpoint" {
   ]
 
   subnet_ids = [
-    aws_subnet.barnone-subnet-public1-a.id, aws_subnet.barnone-subnet-public2-a.id
+    data.aws_subnet.barnone-public1-a.id, data.aws_subnet.barnone-public2-b.id
   ]
 }
-
 
 resource "aws_ecr_repository" "barnone-backend" {
   name                 = "barnone-backend"
@@ -127,7 +85,6 @@ resource "aws_ecr_repository_policy" "barnone-repo-policy" {
   }
   EOF
 }
-
 
 resource "aws_ecs_cluster" "barnone-backend" {
   name = "barnone-backend"
@@ -167,12 +124,14 @@ resource "aws_ecs_task_definition" "barnone-backend-task-def" {
   memory                   = 2048
   container_definitions = jsonencode([
     {
-      name  = "barnone-backend-ecs"
-      #image = "169002939622.dkr.ecr.us-east-1.amazonaws.com/barnone-backend"
+      name = "barnone-backend-ecs"
       image     = "jpzimmerman/barnone-backend"
       cpu       = 10
       memory    = 512
       essential = true
+      environment = [
+        { "name" : "DB_CONNECTION", "value" : "[SECRET]" }
+      ]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -207,10 +166,9 @@ resource "aws_ecs_service" "barnone-backend-ecs" {
   desired_count    = 1
   network_configuration {
     security_groups  = [aws_security_group.barnone-backend.id]
-    subnets          = [aws_subnet.barnone-subnet-public1-a.id, aws_subnet.barnone-subnet-public2-a.id]
+    subnets          = [data.aws_subnet.barnone-public1-a.id, data.aws_subnet.barnone-public2-b.id]
     assign_public_ip = true
   }
 
   depends_on = [aws_security_group.barnone-backend, aws_ecs_task_definition.barnone-backend-task-def, aws_vpc_endpoint.ecr_api_endpoint, aws_vpc_endpoint.ecr_dkr_endpoint]
 }
-

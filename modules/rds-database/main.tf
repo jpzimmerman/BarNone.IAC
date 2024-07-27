@@ -1,51 +1,9 @@
-################################
-##     Imported Resources     ##
-################################
-resource "aws_vpc" "barnone-vpc" {
-  tags = {
-    "Name" = "barnone-vpc"
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
-resource "aws_subnet" "barnone-subnet-public1-a" {
-  vpc_id                  = aws_vpc.barnone-vpc.id
-  cidr_block              = "10.0.0.0/20"
-  map_public_ip_on_launch = true
-
-  lifecycle {
-    prevent_destroy = true
-  }
-
-  tags = {
-    "Name" = "barnone-subnet-public1-us-east-1a"
-  }
-}
-
-resource "aws_subnet" "barnone-subnet-public2-b" {
-  vpc_id                  = aws_vpc.barnone-vpc.id
-  cidr_block              = "10.0.16.0/20"
-  map_public_ip_on_launch = true
-
-  lifecycle {
-    prevent_destroy = true
-  }
-
-  tags = {
-    "Name" = "barnone-subnet-public2-us-east-1b"
-  }
-}
-
-
 ###################################################
 ##    Security Groups, Inbound/Outbound Rules    ##
 ###################################################
 
 resource "aws_security_group" "barnone-db" {
-  vpc_id = aws_vpc.barnone-vpc.id
+  vpc_id = data.aws_vpc.barnone.id
 
   ingress {
 
@@ -65,8 +23,6 @@ resource "aws_security_group" "barnone-db" {
   tags = {
     Name = "barnone-db"
   }
-
-  depends_on = [aws_vpc.barnone-vpc]
 }
 
 ############################
@@ -75,7 +31,7 @@ resource "aws_security_group" "barnone-db" {
 
 resource "aws_db_subnet_group" "barnone-db-subnet-group" {
   name       = "barnone-db-subnet-group"
-  subnet_ids = [aws_subnet.barnone-subnet-public1-a.id, aws_subnet.barnone-subnet-public2-b.id]
+  subnet_ids = [data.aws_subnet.barnone-public1-a.id, data.aws_subnet.barnone-public2-b.id]
 
   tags = {
     Name = "Cocktails DB subnet group"
