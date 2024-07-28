@@ -1,5 +1,6 @@
 resource "aws_security_group" "barnone-backend" {
-  vpc_id = data.aws_vpc.barnone.id
+  vpc_id      = data.aws_vpc.barnone.id
+  description = "Security group facilitating connection between VPC and ECS cluster for backend"
 
   ingress {
 
@@ -21,7 +22,7 @@ resource "aws_security_group" "barnone-backend" {
   }
 }
 
-resource "aws_vpc_endpoint" "ecr_api_endpoint" {
+resource "aws_vpc_endpoint" "ecr_api" {
   vpc_id              = data.aws_vpc.barnone.id
   service_name        = "com.amazonaws.us-east-1.ecr.api"
   private_dns_enabled = true
@@ -36,7 +37,7 @@ resource "aws_vpc_endpoint" "ecr_api_endpoint" {
   ]
 }
 
-resource "aws_vpc_endpoint" "ecr_dkr_endpoint" {
+resource "aws_vpc_endpoint" "ecr_dkr" {
   vpc_id              = data.aws_vpc.barnone.id
   service_name        = "com.amazonaws.us-east-1.ecr.dkr"
   private_dns_enabled = true
@@ -53,7 +54,7 @@ resource "aws_vpc_endpoint" "ecr_dkr_endpoint" {
 
 resource "aws_ecr_repository" "barnone-backend" {
   name                 = "barnone-backend"
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = "IMMUTABLE"
 
   image_scanning_configuration {
     scan_on_push = true
@@ -96,14 +97,14 @@ resource "aws_ecs_cluster" "barnone-backend" {
   }
 }
 
-resource "aws_iam_role" "barnone-backend-task-execution-role" {
-  name               = "barnone-backend-task-execution-role"
+resource "aws_iam_role" "barnone-backend-task-execution" {
+  name               = "barnone-backend-task-execution"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role" {
-  role       = aws_iam_role.barnone-backend-task-execution-role.name
-  policy_arn = data.aws_iam_policy.ecs_task_execution_role.arn
+resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
+  role       = aws_iam_role.barnone-backend-task-execution.name
+  policy_arn = data.aws_iam_policy.ecs_task_execution.arn
 }
 
 resource "aws_cloudwatch_log_group" "barnone-backend-group" {
@@ -118,13 +119,13 @@ resource "aws_cloudwatch_log_group" "barnone-backend-group" {
 resource "aws_ecs_task_definition" "barnone-backend-task-def" {
   family                   = "barnone"
   requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = aws_iam_role.barnone-backend-task-execution-role.arn
+  execution_role_arn       = aws_iam_role.barnone-backend-task-execution.arn
   network_mode             = "awsvpc"
   cpu                      = 1024
   memory                   = 2048
   container_definitions = jsonencode([
     {
-      name = "barnone-backend-ecs"
+      name      = "barnone-backend-ecs"
       image     = "jpzimmerman/barnone-backend"
       cpu       = 10
       memory    = 512
@@ -157,8 +158,8 @@ resource "aws_ecs_task_definition" "barnone-backend-task-def" {
   depends_on = [aws_cloudwatch_log_group.barnone-backend-group]
 }
 
-resource "aws_ecs_service" "barnone-backend-ecs" {
-  name             = "barnone-backend-ecs"
+resource "aws_ecs_service" "barnone-backend" {
+  name             = "barnone-backend"
   cluster          = aws_ecs_cluster.barnone-backend.id
   launch_type      = "FARGATE"
   platform_version = "1.3.0"
@@ -170,5 +171,5 @@ resource "aws_ecs_service" "barnone-backend-ecs" {
     assign_public_ip = true
   }
 
-  depends_on = [aws_security_group.barnone-backend, aws_ecs_task_definition.barnone-backend-task-def, aws_vpc_endpoint.ecr_api_endpoint, aws_vpc_endpoint.ecr_dkr_endpoint]
+  depends_on = [aws_security_group.barnone-backend, aws_ecs_task_definition.barnone-backend-task-def, aws_vpc_endpoint.ecr_api, aws_vpc_endpoint.ecr_dkr]
 }
