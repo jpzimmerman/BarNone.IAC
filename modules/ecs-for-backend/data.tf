@@ -5,7 +5,7 @@ data "aws_vpc" "barnone" {
   }
 }
 
-data "aws_subnet" "barnone-public1-a" {
+data "aws_subnet" "barnone_public1_a" {
   vpc_id = data.aws_vpc.barnone.id
   filter {
     name   = "tag:Name"
@@ -13,12 +13,16 @@ data "aws_subnet" "barnone-public1-a" {
   }
 }
 
-data "aws_subnet" "barnone-public2-b" {
+data "aws_subnet" "barnone_public2_b" {
   vpc_id = data.aws_vpc.barnone.id
   filter {
     name   = "tag:Name"
     values = ["barnone-subnet-public2-us-east-1b"]
   }
+}
+
+data "aws_kms_key" "ecr_key" {
+  key_id = "[SECRET]"
 }
 
 data "aws_iam_policy_document" "ecs_task_assume_role" {
