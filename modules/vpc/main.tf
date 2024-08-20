@@ -32,7 +32,7 @@ resource "aws_default_security_group" "barnone-sg-default" {
   }
 
   tags = {
-    Name = "barnone-db"
+    Name = "barnone-sg-default"
   }
 
   depends_on = [aws_vpc.barnone-vpc]
@@ -97,7 +97,7 @@ resource "aws_subnet" "barnone-subnet-private1-a" {
   enable_resource_name_dns_aaaa_record_on_launch = false
   ipv6_native                                    = false
   map_customer_owned_ip_on_launch                = false
-  map_public_ip_on_launch                        = true
+  map_public_ip_on_launch                        = false
   outpost_arn                                    = ""
   private_dns_hostname_type_on_launch            = "ip-name"
 
@@ -137,7 +137,7 @@ resource "aws_subnet" "barnone-subnet-private2-b" {
   enable_resource_name_dns_aaaa_record_on_launch = false
   ipv6_native                                    = false
   map_customer_owned_ip_on_launch                = false
-  map_public_ip_on_launch                        = true
+  map_public_ip_on_launch                        = false
   outpost_arn                                    = ""
   private_dns_hostname_type_on_launch            = "ip-name"
 
@@ -158,6 +158,26 @@ resource "aws_internet_gateway" "barnone-igw" {
   }
 }
 
+#################################
+##   NAT Gateway, Elastic IP   ##
+#################################
+
+resource "aws_eip" "barnone-eip" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.barnone-igw]
+}
+
+resource "aws_nat_gateway" "barnone-nat" {
+  allocation_id = aws_eip.barnone-eip.id
+  subnet_id     = aws_subnet.barnone-subnet-public1-a.id
+  depends_on    = [aws_internet_gateway.barnone-igw]
+  tags = {
+    Name = "barnone-nat"
+  }
+}
+
+
+
 ####################
 ## Routing Tables ##
 ####################
@@ -176,11 +196,26 @@ resource "aws_default_route_table" "barnone-rtb-public" {
   depends_on = [aws_internet_gateway.barnone-igw]
 }
 
+resource "aws_route_table" "barnone-rtb-private" {
+  vpc_id = aws_vpc.barnone-vpc.id
+
+  tags = {
+    Name = "barnone-private-route-table"
+  }
+}
+
 resource "aws_route" "internet-route" {
   route_table_id         = aws_vpc.barnone-vpc.main_route_table_id
   destination_cidr_block = var.allopen_cidr_block
   gateway_id             = aws_internet_gateway.barnone-igw.id
 }
+
+resource "aws_route" "private_nat_gateway" {
+  route_table_id         = aws_route_table.barnone-rtb-private.id
+  destination_cidr_block = var.allopen_cidr_block
+  nat_gateway_id         = aws_nat_gateway.barnone-nat.id
+}
+
 
 ## Route Table associations
 resource "aws_route_table_association" "barnone-public-association1" {
@@ -195,10 +230,10 @@ resource "aws_route_table_association" "barnone-public-association2" {
 
 resource "aws_route_table_association" "barnone-private-association1" {
   subnet_id      = aws_subnet.barnone-subnet-private1-a.id
-  route_table_id = aws_vpc.barnone-vpc.default_route_table_id
+  route_table_id = aws_route_table.barnone-rtb-private.id
 }
 
 resource "aws_route_table_association" "barnone-private-association2" {
   subnet_id      = aws_subnet.barnone-subnet-private2-b.id
-  route_table_id = aws_vpc.barnone-vpc.default_route_table_id
+  route_table_id = aws_route_table.barnone-rtb-private.id
 }

@@ -1,0 +1,5 @@
+is_global = true
+build_property.RootNamespace = Lambda_GetMenuItems
+build_property.ProjectDir = D:\Projects\BarNone\BarNone.IAC\modules\rds-lambda-getmenuitems\src\Lambda_GetMenuItems\Lambda_GetMenuItems\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
