@@ -14,4 +14,8 @@ resource "aws_lambda_function" "gettags_func" {
 resource "aws_lambda_function_url" "gettags_url" {
   function_name      = aws_lambda_function.gettags_func.arn
   authorization_type = "NONE"
+
+  cors {
+    allow_methods = ["GET"]
+  }
 }

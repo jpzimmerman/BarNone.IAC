@@ -9,6 +9,14 @@ resource "aws_vpc" "barnone-vpc" {
   }
 }
 
+resource "aws_flow_log" "example" {
+  iam_role_arn    = aws_iam_role.barnone-vpc.arn
+	log_destination = aws_cloudwatch_log_group.barnone.arn
+	traffic_type    = "ALL"
+	vpc_id          = aws_vpc.barnone-vpc.id
+}
+
+
 ###################################################
 ##    Security Groups, Inbound/Outbound Rules    ##
 ###################################################
@@ -16,20 +24,20 @@ resource "aws_vpc" "barnone-vpc" {
 resource "aws_default_security_group" "barnone-sg-default" {
   vpc_id = aws_vpc.barnone-vpc.id
 
-  ingress {
+  # ingress {
 
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = [var.allopen_cidr_block]
-  }
+  #   from_port   = 80
+  #   to_port     = 80
+  #   protocol    = "tcp"
+  #   cidr_blocks = [var.allopen_cidr_block]
+  # }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [var.allopen_cidr_block]
-  }
+  # egress {
+  #   from_port   = 0
+  #   to_port     = 0
+  #   protocol    = "-1"
+  #   cidr_blocks = [var.allopen_cidr_block]
+  # }
 
   tags = {
     Name = "barnone-sg-default"
