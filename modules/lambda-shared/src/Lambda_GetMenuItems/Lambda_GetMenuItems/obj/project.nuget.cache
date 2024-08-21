@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "dgSpecHash": "cM6qOOYcMHQ=",
+  "success": true,
+  "projectFilePath": "D:\\Projects\\BarNone\\BarNone.IAC\\modules\\lambda-shared\\src\\Lambda_GetMenuItems\\Lambda_GetMenuItems\\Lambda_GetMenuItems.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\sithp\\.nuget\\packages\\amazon.lambda.core\\2.2.0\\amazon.lambda.core.2.2.0.nupkg.sha512",
+    "C:\\Users\\sithp\\.nuget\\packages\\amazon.lambda.serialization.systemtextjson\\2.4.3\\amazon.lambda.serialization.systemtextjson.2.4.3.nupkg.sha512",
+    "C:\\Users\\sithp\\.nuget\\packages\\awssdk.core\\3.7.400.2\\awssdk.core.3.7.400.2.nupkg.sha512",
+    "C:\\Users\\sithp\\.nuget\\packages\\awssdk.rds\\3.7.400.2\\awssdk.rds.3.7.400.2.nupkg.sha512",
+    "C:\\Users\\sithp\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\7.0.1\\microsoft.extensions.logging.abstractions.7.0.1.nupkg.sha512",
+    "C:\\Users\\sithp\\.nuget\\packages\\mysqlconnector\\2.3.7\\mysqlconnector.2.3.7.nupkg.sha512",
+    "C:\\Users\\sithp\\.nuget\\packages\\system.diagnostics.diagnosticsource\\7.0.2\\system.diagnostics.diagnosticsource.7.0.2.nupkg.sha512",
+    "C:\\Users\\sithp\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

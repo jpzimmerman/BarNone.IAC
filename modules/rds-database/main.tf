@@ -7,10 +7,10 @@ resource "aws_security_group" "barnone-db" {
   description = "Security group facilitating connection between VPC and DB"
 
   ingress {
-    description = "Ingress rule for MySQL DB"
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
+    description     = "Ingress rule for MySQL DB"
+    from_port       = 3306
+    to_port         = 3306
+    protocol        = "tcp"
     security_groups = [data.aws_security_group.default_sg.id]
   }
 
@@ -54,4 +54,16 @@ resource "aws_db_instance" "cocktails" {
   apply_immediately                   = true
 
   depends_on = [aws_db_subnet_group.barnone-db]
+}
+
+resource "null_resource" "db_setup" {
+
+  provisioner "local-exec" {
+
+    command = "mysql -h ${aws_db_instance.cocktails.address} -P 3306 -p ${aws_db_instance.cocktails.username} -f ./cocktail-db-init.sql"
+
+    environment = {
+      PASSWORD = "${aws_db_instance.cocktails.password}"
+    }
+  }
 }
