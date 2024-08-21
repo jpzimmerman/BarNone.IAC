@@ -9,7 +9,7 @@ resource "aws_vpc" "barnone-vpc" {
   }
 }
 
-resource "aws_flow_log" "example" {
+resource "aws_flow_log" "barnone-flow-log" {
   iam_role_arn    = aws_iam_role.barnone-vpc.arn
 	log_destination = aws_cloudwatch_log_group.barnone.arn
 	traffic_type    = "ALL"
