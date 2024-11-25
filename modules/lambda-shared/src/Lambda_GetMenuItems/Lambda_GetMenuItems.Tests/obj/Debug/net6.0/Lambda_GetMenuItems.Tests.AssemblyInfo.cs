@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Lambda_GetMenuItems.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3a6efceff5ca57955aec24a9780d8c4146f34d31")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1a6763ae6a1e847def61d352e7828c62a2174f95")]
 [assembly: System.Reflection.AssemblyProductAttribute("Lambda_GetMenuItems.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Lambda_GetMenuItems.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
