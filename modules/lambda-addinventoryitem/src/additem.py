@@ -18,7 +18,7 @@ ssl = {'ca': 'us-east-1-bundle.pem'}
 def handler(event, context):
     conn = pymysql.connect(host=rds_host, user=username, passwd=token, db=db_name, connect_timeout=30,ssl=ssl)
     cursor = conn.cursor()
-    cursor.execute("call GetTags()")
+    cursor.callproc('GetTags')
     final = []
     workinglist = list(cursor.fetchall())
     for item in workinglist:
