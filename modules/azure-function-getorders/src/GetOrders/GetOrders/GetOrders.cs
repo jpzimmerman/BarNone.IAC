@@ -19,7 +19,7 @@ namespace GetOrders
         {
             try
             {
-                using (var connection = new SqlConnection("DB_CONNECTION"))
+                using (var connection = new SqlConnection(Environment.GetEnvironmentVariable("DB_CONNECTION")))
                 {
                     var command = new SqlCommand("GetOrders", connection)
                     {
